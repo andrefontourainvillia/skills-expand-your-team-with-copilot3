@@ -27,7 +27,7 @@ This is a full-stack web application built with Python (FastAPI) for the backend
 ## 📁 Project Structure
 
 ```
-skills-expand-your-team-with-copilot3/
+<repository-root>/
 ├── src/
 │   ├── app.py                    # Main FastAPI application entry point
 │   ├── requirements.txt          # Python dependencies
@@ -64,8 +64,8 @@ Database configuration file that:
 - Establishes MongoDB connection
 - Defines database collections (activities and teachers)
 - Initializes sample data for 13 different activities
-- Creates default teacher accounts with hashed passwords
-- Provides password hashing utilities using Argon2
+- Creates default teacher accounts with hashed passwords (using Argon2)
+- Provides password hashing utilities
 
 #### `src/backend/routers/activities.py`
 Activity management endpoints:
@@ -76,7 +76,7 @@ Activity management endpoints:
 
 #### `src/backend/routers/auth.py`
 Authentication endpoints:
-- `POST /auth/login` - Teacher login with username and password
+- `POST /auth/login` - Teacher login with username and password (using SHA-256 hashing)
 - `GET /auth/check-session` - Validate teacher session
 
 ### Frontend Files
@@ -142,7 +142,7 @@ Application styling including:
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd skills-expand-your-team-with-copilot3
+   cd <repository-directory>
    ```
 
 2. **Install Python dependencies**
@@ -178,10 +178,17 @@ Application styling including:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/auth/login` | Teacher login (pass `username` and `password` as query parameters or request body) |
-| GET | `/auth/check-session` | Validate session (pass `username` as query parameter) |
+| POST | `/auth/login` | Teacher login - accepts `username` and `password` as query parameters |
+| GET | `/auth/check-session` | Validate session - accepts `username` as query parameter |
 
-**Note**: For production use, authentication credentials should be passed in the request body or via secure headers, not in URL query parameters.
+**Example**:
+```bash
+# Login
+curl -X POST "http://localhost:8000/auth/login?username=mchen&password=chess456"
+
+# Check session
+curl "http://localhost:8000/auth/check-session?username=mchen"
+```
 
 ### Default Teacher Accounts
 
@@ -236,7 +243,7 @@ For detailed development instructions, see the [Development Guide](docs/how-to-d
 - The database is initialized with 13 sample activities on first run
 - Student emails must use the @mergington.edu domain
 - Teacher authentication is required for registration/unregistration operations
-- Passwords are securely hashed using Argon2
+- Initial passwords are hashed with Argon2 in database.py, but authentication uses SHA-256 for password comparison
 
 ## 🤝 Contributing
 
