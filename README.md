@@ -243,7 +243,7 @@ For detailed development instructions, see the [Development Guide](docs/how-to-d
 - The database is initialized with 13 sample activities on first run
 - Student emails must use the @mergington.edu domain
 - Teacher authentication is required for registration/unregistration operations
-- Initial passwords are hashed with Argon2 in database.py, but authentication uses SHA-256 for password comparison
+- **Important**: There is a password hashing inconsistency in the current implementation - database.py uses Argon2 for initial password creation while auth.py uses SHA-256 for authentication. This may affect authentication functionality.
 
 ## 🤝 Contributing
 
