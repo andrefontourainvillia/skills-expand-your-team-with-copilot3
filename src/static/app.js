@@ -25,6 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
 
+  // Constants
+  const SCHOOL_NAME = 'Mergington High School';
+
   // Activity categories with corresponding colors
   const activityTypes = {
     sports: { label: "Sports", color: "#e8f5e9", textColor: "#2e7d32" },
@@ -477,6 +480,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
 
+    // Sanitize data for safe use in HTML attributes
+    const sanitizedName = name.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const sanitizedDescription = details.description.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
     // Calculate spots and capacity
     const totalSpots = details.max_participants;
     const takenSpots = details.participants.length;
@@ -552,6 +559,20 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("")}
         </ul>
       </div>
+      <div class="share-buttons">
+        <button class="share-button share-twitter" data-activity="${sanitizedName}" data-description="${sanitizedDescription}" data-schedule="${formattedSchedule}" title="Share on Twitter" aria-label="Share ${sanitizedName} on Twitter">
+          <span class="share-icon">🐦</span>
+        </button>
+        <button class="share-button share-facebook" data-activity="${sanitizedName}" data-description="${sanitizedDescription}" data-schedule="${formattedSchedule}" title="Share on Facebook" aria-label="Share ${sanitizedName} on Facebook">
+          <span class="share-icon">📘</span>
+        </button>
+        <button class="share-button share-email" data-activity="${sanitizedName}" data-description="${sanitizedDescription}" data-schedule="${formattedSchedule}" title="Share via Email" aria-label="Share ${sanitizedName} via Email">
+          <span class="share-icon">✉️</span>
+        </button>
+        <button class="share-button share-copy" data-activity="${sanitizedName}" data-description="${sanitizedDescription}" data-schedule="${formattedSchedule}" title="Copy Link" aria-label="Copy link for ${sanitizedName}">
+          <span class="share-icon">📋</span>
+        </button>
+      </div>
       <div class="activity-card-actions">
         ${
           currentUser
@@ -586,6 +607,27 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    // Add click handlers for share buttons
+    const shareButtons = activityCard.querySelectorAll(".share-button");
+    shareButtons.forEach((button) => {
+      button.addEventListener("click", (e) => {
+        e.preventDefault();
+        const activityName = button.dataset.activity;
+        const description = button.dataset.description;
+        const schedule = button.dataset.schedule;
+        
+        if (button.classList.contains("share-twitter")) {
+          shareOnTwitter(activityName, description, schedule);
+        } else if (button.classList.contains("share-facebook")) {
+          shareOnFacebook(activityName, description);
+        } else if (button.classList.contains("share-email")) {
+          shareViaEmail(activityName, description, schedule);
+        } else if (button.classList.contains("share-copy")) {
+          copyShareLink(activityName, button);
+        }
+      });
+    });
 
     activitiesList.appendChild(activityCard);
   }
@@ -860,6 +902,78 @@ document.addEventListener("DOMContentLoaded", () => {
     setDayFilter,
     setTimeRangeFilter,
   };
+
+  // Social Sharing Functions
+  function shareOnTwitter(activityName, description, schedule) {
+    const text = `Check out ${activityName} at ${SCHOOL_NAME}! ${description} Schedule: ${schedule}`;
+    const url = window.location.href;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, '_blank', 'width=600,height=400');
+  }
+
+  function shareOnFacebook(activityName, description) {
+    const url = window.location.href;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(facebookUrl, '_blank', 'width=600,height=400');
+  }
+
+  function shareViaEmail(activityName, description, schedule) {
+    const subject = `Check out ${activityName} at ${SCHOOL_NAME}`;
+    const body = `Hi,\n\nI wanted to share this great activity with you:\n\n${activityName}\n${description}\n\nSchedule: ${schedule}\n\nLearn more at: ${window.location.href}`;
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  }
+
+  function copyShareLink(activityName, button) {
+    const url = window.location.href;
+    const shareText = `Check out ${activityName} at ${SCHOOL_NAME}: ${url}`;
+    const shareIcon = button.querySelector('.share-icon');
+    
+    // Try using the modern clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareText)
+        .then(() => {
+          showMessage('Link copied to clipboard!', 'success');
+          // Visual feedback on button
+          const originalIcon = shareIcon.textContent;
+          shareIcon.textContent = '✓';
+          setTimeout(() => {
+            shareIcon.textContent = originalIcon;
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Failed to copy:', err);
+          fallbackCopyText(shareText);
+        });
+    } else {
+      fallbackCopyText(shareText);
+    }
+  }
+
+  function fallbackCopyText(text) {
+    // Fallback method for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.setAttribute('aria-hidden', 'true');
+    textArea.setAttribute('tabindex', '-1');
+    document.body.appendChild(textArea);
+    textArea.select();
+    
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        showMessage('Link copied to clipboard!', 'success');
+      } else {
+        showMessage('Unable to copy. Please use your browser\'s copy function.', 'error');
+      }
+    } catch (err) {
+      showMessage('Unable to copy. Please use your browser\'s copy function.', 'error');
+    }
+    
+    document.body.removeChild(textArea);
+  }
 
   // Initialize app
   checkAuthentication();
