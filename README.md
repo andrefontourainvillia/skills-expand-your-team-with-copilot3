@@ -141,7 +141,7 @@ Application styling including:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/andrefontourainvillia/skills-expand-your-team-with-copilot3.git
+   git clone <repository-url>
    cd skills-expand-your-team-with-copilot3
    ```
 
@@ -178,8 +178,10 @@ Application styling including:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/auth/login?username=mchen&password=chess456` | Teacher login |
-| GET | `/auth/check-session?username=mchen` | Validate session |
+| POST | `/auth/login` | Teacher login (pass `username` and `password` as query parameters or request body) |
+| GET | `/auth/check-session` | Validate session (pass `username` as query parameter) |
+
+**Note**: For production use, authentication credentials should be passed in the request body or via secure headers, not in URL query parameters.
 
 ### Default Teacher Accounts
 
