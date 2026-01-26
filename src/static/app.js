@@ -540,6 +540,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const startMinutes = parseInt(start_time.split(':')[1]);
         const endMinutes = parseInt(end_time.split(':')[1]);
         
+        // Skip activities outside the calendar's time range (6 AM - 6 PM)
+        if (startHour < 6 || startHour > 18) {
+          return;
+        }
+        
         // Calculate which hour slot to place this in (use start hour)
         const timeSlot = `${startHour.toString().padStart(2, '0')}:00`;
         
@@ -569,6 +574,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!cell) return;
       
       const numActivities = activities.length;
+      
+      // Guard against division by zero
+      if (numActivities === 0) return;
+      
       const widthPercent = 100 / numActivities;
       
       activities.forEach((activity, index) => {
